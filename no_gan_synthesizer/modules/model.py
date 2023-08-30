@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from typing import List
+from modules import metrics
 
 class NoGANSynth:
     def __init__(self, data:np.array, features:List = None, 
@@ -80,6 +81,17 @@ class NoGANSynth:
                 data_synth.append(new_obs)               
         data_synth = pd.DataFrame(data_synth, columns = self.features)
         return data_synth
+    
+    def evaluate(self, training_data:pd.DataFrame, 
+                 validation_data:pd.DataFrame, synthetic_data:pd.DataFrame
+                 ):
+            
+        ecdf_validation = metrics.compute_ecdf(validation_data, 1000, False)
+        ks_max, ecdf_val1, ecdf_synth = metrics.ks_delta(synthetic_data, ecdf_validation)  
+        print(f"ECDF Kolmogorof-Smirnov dist. (synth. vs valid.): {ks_max:6.4f}")
+        
+        base_ks_max, ecdf_val2, ecdf_train = metrics.ks_delta(training_data, ecdf_validation)  
+        print(f"Base ECDF Kolmogorof-Smirnov dist. (train. vs valid.): {base_ks_max:6.4f}")          
         
             
         
