@@ -3,3 +3,4 @@
 
 ##### In case of problems viewing the Jupyter notebook code, please use nbviewer as follows:
 https://nbviewer.org/github/rajiviyer/Machine-Learning/blob/main/no_gan_synthesizer/nogan_synth.ipynb
+https://nbviewer.org/github/rajiviyer/Machine-Learning/blob/main/no_gan_synthesizer/nogan_vs_gan.ipynb
