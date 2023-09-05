@@ -1,4 +1,4 @@
-from typing import Union, List
+from typing import Union, List, Tuple
 import numpy as np
 import pandas as pd
 import plotly.graph_objs as go
@@ -6,8 +6,15 @@ import ipywidgets as widgets
 import matplotlib.pyplot as plt
 import seaborn as sns
 import itertools
+from sklearn.decomposition import PCA
 
-def get_cleaned_students_data():
+def get_cleaned_students_data()->pd.DataFrame:
+    """
+    Get Students Dataset, clean the column names and Label Encode the Category Columns
+
+    Returns:
+        pd.DataFrame: Pandas DataFrame
+    """
     data = pd.read_csv("data/student_success.csv",sep = ";")
     data.columns = data.columns.str.lower().str.replace("[/,\t,(,),']","", regex = True).str.replace(" ", "_")
     for col in data.select_dtypes(include=[object]).columns:
@@ -15,6 +22,15 @@ def get_cleaned_students_data():
     return data
     
 def label_encode(categorical_data: Union[list, pd.Series])->List:
+    """
+    Function to perform Label Encoding for Categorical Columns
+
+    Args:
+        categorical_data (Union[list, pd.Series]): Accepts a list or pandas Series as input
+
+    Returns:
+        List: Returns a list of Label Encoded values
+    """
     unique_values = list(set(categorical_data))
     label_mapping = {value: index for index, value in enumerate(unique_values)}
 
@@ -26,8 +42,21 @@ def label_encode(categorical_data: Union[list, pd.Series])->List:
     #                 in label_mapping.items() if idx == index]
     return encoded_data
 
-def stratified_train_test_split(df, target_column, train_size=0.8, 
-                                random_state=None):
+def stratified_train_test_split(df:pd.DataFrame, target_column:str, 
+                                train_size:float=0.8, 
+                                random_state:int=None)->Tuple:
+    """
+    Function to perform Stratified Sampling
+
+    Args:
+        df (pd.DataFrame): Pandas DataFrame
+        target_column (str): Target Column Name
+        train_size (float, optional): Percent Split Value for Train. Defaults to 0.8.
+        random_state (int, optional): Random Seed. Defaults to None.
+
+    Returns:
+        Tuple: Returns a tuple of Train and Validation Data
+    """
     unique_targets = df[target_column].unique()
     train_indices = []
     test_indices = []
@@ -99,7 +128,19 @@ def plot_histogram_comparison(dfs:pd.DataFrame, dfv:pd.DataFrame,
     plt.suptitle(title)
 
 def plot_scatter_comparison(dfs:pd.DataFrame, dfv:pd.DataFrame, 
-                 features:List, title:str):
+                 features:List, title:str)-> None:
+    """
+    Function to display scatter plots between columns of two DataFrames
+
+    Args:
+        dfs (pd.DataFrame): Pandas DataFrame A
+        dfv (pd.DataFrame): Pandas DataFrame B
+        features (List): Features List
+        title (str): Plot Title
+        
+    Returns: None
+    """
+    
     feature_combinations = list(itertools.combinations(features, 2))
 
     num_graphs = len(feature_combinations) * 2
@@ -125,6 +166,18 @@ def plot_density_comparison(df_a:pd.DataFrame, df_b:pd.DataFrame,
                             features:List, title:str,
                             df_a_name:str = "A", 
                             df_b_name:str = "B")->None:
+    """
+    Function to display density plots between columns of two DataFrames
+
+    Args:
+        dfs (pd.DataFrame): Pandas DataFrame A
+        dfv (pd.DataFrame): Pandas DataFrame B
+        features (List): Features List
+        title (str): Plot Title
+        
+    Returns: None
+    """
+    
     if len(df_a.columns) != len(df_b.columns):
         raise Exception("Both datasets should have same number of columns")
     
@@ -146,29 +199,33 @@ def plot_density_comparison(df_a:pd.DataFrame, df_b:pd.DataFrame,
                     hue = labels, common_norm=False ,ax = ax)
     plt.suptitle(title) 
 
+def plot_pca_comparison(df_a:pd.DataFrame, df_b:pd.DataFrame,
+                        title:str,
+                        df_a_name:str = "A", 
+                        df_b_name:str = "B")->None:
+    """
+    Function to reduce the dimensions of two dataframes using PCA with 2 components and plot them.
+    Args:
+        df_a (pd.DataFrame): Pandas DataFrame A
+        df_b (pd.DataFrame): Pandas DataFrame B
+        title (str): Plot Title
+        df_a_name (str): DataFrame A column Label. Defaults to "A".
+        df_b_name (str): DataFrame B column Label. Defaults to "B".
+    """
+    pca_a = PCA(n_components = 2)
+    pca_b = PCA(n_components = 2)
+    
+    pca_a_t = pca_a.fit_transform(df_a)
+    pca_b_t = pca_b.fit_transform(df_b)
+    
+    _, ax = plt.subplots(1,2)
+    
+    sns.scatterplot(x = pca_a_t[:,0], y = pca_a_t[:,1], 
+                    ax = ax[0], label = df_a_name)
+    sns.scatterplot(x = pca_b_t[:,0], y = pca_b_t[:,1], 
+                    ax = ax[1], label = df_b_name)
+    plt.suptitle(title)
+    plt.show()    
+
 def plot_histogram(data:pd.DataFrame, col:str, bins:int= 10)->None:
     sns.histplot(data=data, x = col, bins = bins)
-    
-# def plot_histogram(data:pd.DataFrame):
-#     # Calculate the number of rows and columns for subplots
-#     num_rows = (data.shape[1] + 3) // 4  # Number of rows required
-#     num_cols = min(data.shape[1], 4)  # Number of columns in each row
-
-#     # Create subplots
-#     fig, axes = plt.subplots(num_rows, num_cols, figsize=(15, 4 * num_rows))
-#     axes = axes.flatten()  # Flatten the 2D array of axes for easier indexing
-
-#     # Plot histograms for each column in subplots
-#     for i, col in enumerate(data.columns):
-#         ax = axes[i]
-#         data[col].plot(kind='hist', ax=ax, bins=10, edgecolor='black')
-#         ax.set_title(col)
-#         ax.set_xlabel('Value')
-#         ax.set_ylabel('Frequency')
-
-#     # Remove any unused subplots
-#     for i in range(len(data.columns), len(axes)):
-#         axes[i].remove()
-
-#     plt.tight_layout()
-#     plt.show()    
