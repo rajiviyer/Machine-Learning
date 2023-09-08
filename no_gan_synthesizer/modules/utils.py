@@ -17,8 +17,18 @@ def get_cleaned_students_data()->pd.DataFrame:
     """
     data = pd.read_csv("data/student_success.csv",sep = ";")
     data.columns = data.columns.str.lower().str.replace("[/,\t,(,),']","", regex = True).str.replace(" ", "_")
-    for col in data.select_dtypes(include=[object]).columns:
-        data[col] = label_encode(data[col])
+    
+    # cat_cols = [
+    #     'marital_status','application_mode','course',
+    #     'previous_qualification','nacionality','mothers_qualification', 'fathers_qualification','mothers_occupation', 'fathers_occupation','target'
+    #     ]
+    
+    # #for col in data.select_dtypes(include=[object]).columns:
+    # for col in cat_cols:
+    #     data[col] = label_encode(data[col])
+    
+    # data["target"] = label_encode(data["target"])
+    
     return data
     
 def label_encode(categorical_data: Union[list, pd.Series])->List:
@@ -182,22 +192,62 @@ def plot_density_comparison(df_a:pd.DataFrame, df_b:pd.DataFrame,
         raise Exception("Both datasets should have same number of columns")
     
     
-    num_cols = 4
-    num_rows = len(features) // num_cols
+    num_cols = min(4, len(features))
+    num_rows = int(np.ceil(len(features) / num_cols))
     #print(num_rows)
     # Create subplots
     fig, axes = plt.subplots(num_rows, num_cols, figsize=(15, 4 * num_rows))
     axes = axes.flatten()
     for i, ax in enumerate(axes):
-        column_name = features[i]
-        labels = [df_a_name] * len(df_a) + [df_b_name] * len(df_b)
-        #print(dfs[column_name])
-        combined_data = pd.concat([df_a[column_name], df_b[column_name]])
-        combined_df = pd.DataFrame({f"{column_name}": combined_data, 'Data': labels})
-        #print(combined_df.columns)
-        sns.kdeplot(data=combined_df, x=column_name, 
-                    hue = labels, common_norm=False ,ax = ax)
+        if i <= len(features)-1:
+            column_name = features[i]
+            labels = [df_a_name] * len(df_a) + [df_b_name] * len(df_b)
+            #print(dfs[column_name])
+            combined_data = pd.concat([df_a[column_name], df_b[column_name]])
+            combined_df = pd.DataFrame({f"{column_name}": combined_data, 'Data': labels})
+            #print(combined_df.columns)
+            sns.kdeplot(data=combined_df, x=column_name, 
+                        hue = labels, common_norm=False ,ax = ax)
     plt.suptitle(title) 
+
+def plot_count_comparison(df_a:pd.DataFrame, df_b:pd.DataFrame,
+                            features:List, title:str,
+                            df_a_name:str = "A", 
+                            df_b_name:str = "B")->None:
+    """
+    Function to display count plots between columns of two DataFrames
+
+    Args:
+        dfs (pd.DataFrame): Pandas DataFrame A
+        dfv (pd.DataFrame): Pandas DataFrame B
+        features (List): Features List
+        title (str): Plot Title
+        
+    Returns: None
+    """
+    
+    if len(df_a.columns) != len(df_b.columns):
+        raise Exception("Both datasets should have same number of columns")
+    
+    
+    num_cols = min(4, len(features))
+    num_rows = int(np.ceil(len(features) / num_cols))
+    #print(num_rows)
+    # Create subplots
+    fig, axes = plt.subplots(num_rows, num_cols, figsize=(15, 4 * num_rows))
+    axes = axes.flatten()
+    for i, ax in enumerate(axes):
+        if i <= len(features)-1:
+            column_name = features[i]
+            labels = [df_a_name] * len(df_a) + [df_b_name] * len(df_b)
+            #print(dfs[column_name])
+            combined_data = pd.concat([df_a[column_name], df_b[column_name]])
+            combined_df = pd.DataFrame({f"{column_name}": combined_data, 'Data': labels})
+            #print(combined_df.columns)
+            combined_df.groupby([column_name,"Data"]).size().reset_index().pivot(columns="Data", index=column_name, values=0).plot.barh(ax = ax)
+    plt.tight_layout()
+    plt.suptitle(title) 
+
 
 def plot_pca_comparison(df_a:pd.DataFrame, df_b:pd.DataFrame,
                         title:str,

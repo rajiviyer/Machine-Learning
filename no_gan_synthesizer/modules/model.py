@@ -130,6 +130,7 @@ class NoGANSynth:
                  validation_data:pd.DataFrame, 
                  synthetic_data:pd.DataFrame,
                  n_nodes:int = 1000,
+                 random_seed:int = 42,
                  verbose:bool = True
                  )->dict:
         """
@@ -145,7 +146,7 @@ class NoGANSynth:
         Returns:
             dict: Results Dictionary having the evaluation metrics of train vs validation and synth vs validation
         """
-            
+        np.random.seed(random_seed)
         ecdf_validation = metrics.compute_ecdf(validation_data, n_nodes, True, verbose)
         ks_max, ecdf_val1, ecdf_synth = metrics.ks_delta(synthetic_data, ecdf_validation)  
         # print(f"ECDF Kolmogorof-Smirnov dist. (synth. vs valid.): {ks_max**(1/len(training_data.columns)):6.4f}")

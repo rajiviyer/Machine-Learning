@@ -50,7 +50,8 @@ def nogan_synth(nogan:model.NoGANSynth, training_data:pd.DataFrame,
     #                          synth_data, n_nodes, verbose = False) 
 
     results = nogan.evaluate(training_data, validation_data,
-                             synth_data, n_nodes, verbose = verbose) 
+                             synth_data, n_nodes, random_seed, 
+                             verbose = verbose) 
 
     
     return synth_data, results  
