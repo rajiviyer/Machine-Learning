@@ -3,6 +3,7 @@ import pandas as pd
 from typing import List
 from modules import metrics
 from sklearn.decomposition import PCA
+from genai_evaluation import multivariate_ecdf, ks_statistic
 
 class NoGANSynth:
     """
@@ -146,13 +147,31 @@ class NoGANSynth:
         Returns:
             dict: Results Dictionary having the evaluation metrics of train vs validation and synth vs validation
         """
-        np.random.seed(random_seed)
-        ecdf_validation = metrics.compute_ecdf(validation_data, n_nodes, True, verbose)
-        ks_max, ecdf_val1, ecdf_synth = metrics.ks_delta(synthetic_data, ecdf_validation)  
+        #np.random.seed(random_seed)
+        # ecdf_validation = metrics.compute_ecdf(validation_data, n_nodes, True, verbose)
+        # ks_max, ecdf_val1, ecdf_synth = metrics.ks_delta(synthetic_data, ecdf_validation)  
         # print(f"ECDF Kolmogorof-Smirnov dist. (synth. vs valid.): {ks_max**(1/len(training_data.columns)):6.4f}")
         
-        base_ks_max, ecdf_val2, ecdf_train = metrics.ks_delta(training_data, ecdf_validation)  
+        # base_ks_max, ecdf_val2, ecdf_train = metrics.ks_delta(training_data, ecdf_validation)  
         # print(f"Base ECDF Kolmogorof-Smirnov dist. (train. vs valid.): {base_ks_max**(1/len(training_data.columns)):6.4f}")          
+        
+        _, ecdf_val1, ecdf_synth = \
+                        multivariate_ecdf(validation_data, 
+                                     synthetic_data, 
+                                     n_nodes = n_nodes,
+                                     verbose = verbose,
+                                     random_seed=random_seed)
+
+        _, ecdf_val2, ecdf_train = \
+                        multivariate_ecdf(validation_data, 
+                                     training_data, 
+                                     n_nodes = n_nodes,
+                                     verbose = verbose,
+                                     random_seed=random_seed)
+        
+        ks_max = ks_statistic(ecdf_synth, ecdf_val1)
+        base_ks_max = ks_statistic(ecdf_train, ecdf_val2)
+                        
         results = {}
         results["synth_comparison"] = {"ks_stat": ks_max, 
                                        "ecdf_data": (ecdf_val1, ecdf_synth)}
