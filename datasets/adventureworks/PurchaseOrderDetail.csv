@@ -1,3 +1,4 @@
+purchaseorderid	purchaseorderdetailid	duedate	orderqty	productid	unitprice	linetotal	receivedqty		rejectedqty	stockedqty	modifieddate
 1	1	2011-04-30 00:00:00	4	1	50.26	201.04	3.00	.00	3.00	2011-04-23 00:00:00
 2	2	2011-04-30 00:00:00	3	359	45.12	135.36	3.00	.00	3.00	2011-04-23 00:00:00
 2	3	2011-04-30 00:00:00	3	360	45.5805	136.7415	3.00	.00	3.00	2011-04-23 00:00:00

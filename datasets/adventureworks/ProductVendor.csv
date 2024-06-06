@@ -1,3 +1,4 @@
+productid	businessentityid	averageleadtime	standardprice	lastreceiptcost	lastreceiptdate	minorderqty	maxorderqty	onorderqty	unitmeasurecode	modifieddate
 1	1580	17	47.87	50.2635	2011-08-29 00:00:00	1	5	3	CS 	2011-08-29 00:00:00
 2	1688	19	39.92	41.916	2011-08-29 00:00:00	1	5	3	CTN	2011-08-29 00:00:00
 4	1650	17	54.31	57.0255	2011-08-29 00:00:00	1	5		CTN	2011-08-29 00:00:00
